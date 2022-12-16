@@ -155,18 +155,13 @@ fn json_content_type(headers: &HeaderMap) -> Option<mime::Mime> {
                 .map_or(false, |name| name.eq(&mime::JSON))
                 .then(|| mime::JSON);
 
-            let type_ = m
-                .type_()
-                .eq(&mime::APPLICATION)
-                .then(|| mime::APPLICATION_JSON);
-
             let subtype = m.subtype().eq(&mime::JSON).then(|| mime::JSON);
 
-            [subtype, suffix]
-                .iter()
-                .any(|x| x.is_some())
-                .then(|| type_)
-                .flatten()
+            suffix.or(subtype).and_then(|_| {
+                m.type_()
+                    .eq(&mime::APPLICATION)
+                    .then(|| mime::APPLICATION_JSON)
+            })
         })
 }
 
